@@ -12,50 +12,35 @@
     <button id="decrement">Decrement</button>
 
 
+    <script src="state.js"></script>
     <script>
-        function State(value) {
-            return {
-                value,
-                hook: null,
-                get getState() {
-                    console.log('getter is called')
-                    return this.value
-                },
-                set setState(param) {
-                    console.log('setter is called')
-                    this.value = param instanceof Function ? param(this.value) : param
-                    if(this.hook instanceof Function) this.hook()
-                },
-                set setHook(param) {
-                    if(param instanceof Function) return this.hook = param
-                }
-            }
-        }
-
         window.addEventListener('load', () => {
-            const valueEl1 = document.getElementById('value')
-            const inputEl1 = document.getElementById('inputEl')
+            const valueEl = document.getElementById('value')
+            const inputEl = document.getElementById('inputEl')
             const incrementEl = document.getElementById('increment')
             const decrementEl = document.getElementById('decrement')
 
-
             const updateElement = (value) => {
-                valueEl1.innerText = value
-                inputEl1.value = value
+                valueEl.innerText = value
+                inputEl.value = value
             }
 
-            const state = new State(0)
+            const state = new State(0, (initialState) => updateElement(initialState))
+            state.setHook = (state) => updateElement(state)
 
-            state.setHook = () => {
-                updateElement(state.getState)
-            }
-            updateElement(state.getState)
-
-            inputEl1.addEventListener('change', e => {
+            inputEl.addEventListener('change', e => {
                 state.setState = (prev) => {
                     if(!e.target.value) return prev
-                    if(prev < 0) return prev
-                    return Number(prev) - 1
+                    if(e.target.value < 0) return 0
+                    return Number(e.target.value)
+                }
+            })
+
+            inputEl.addEventListener('keyup', e => {
+                state.setState = (prev) => {
+                    if(!e.target.value) return prev
+                    if(e.target.value < 0) return 0
+                    return Number(e.target.value)
                 }
             })
 
@@ -69,10 +54,6 @@
                     return prev
                 }
             })
-
-            setInterval(() => {
-                state.setState = prev => prev + 1
-            }, 1000);
         })
     </script>
 </body>
